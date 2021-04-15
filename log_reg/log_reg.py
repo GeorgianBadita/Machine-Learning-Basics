@@ -101,6 +101,38 @@ def log_reg_non_stoch(x, y, lr, max_iterations, print_iter_num, verbose=False):
     return best_weights, weights, loss
 
 
+def log_reg_stoch(x, y, lr, max_iterations, print_iter_num, verbose=False):
+    # computes the weights a vector of features x and their corresponding labels  y
+    # using the non stochastic logistic regression algorithm
+
+    if isinstance(x, list):
+        x = np.array(x)
+    if isinstance(y, list):
+        y = np.array(y)
+
+    n, m = x.shape
+    weights = np.random.rand(m)
+    best_weights = weights
+    best_cost = np.inf
+
+    loss = []
+    for iteration in tqdm(range(max_iterations)):
+        for i in range(len(x)):
+            diff = sig(np.dot(x[i], weights)) - y[i]
+            weights = weights - lr/n * diff * x[i]
+
+        current_loss = cost_function(x, y, weights)
+        if current_loss < best_cost:
+            best_cost = current_loss
+            best_weights = weights
+
+        loss.append(current_loss)
+        if iteration % print_iter_num == 0 and verbose is True:
+            print(f"Iteration: {iteration}, has cost: {current_loss}")
+
+    return best_weights, weights, loss
+
+
 def predict(x, w):
     # predicts the binary class of a vector of features x, using a vector of weights w
     return np.array([1 if pred > 0.5 else 0 for pred in apply_sig(x, w)])
